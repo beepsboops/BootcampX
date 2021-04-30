@@ -10,6 +10,7 @@ const pool = new Pool({
 commandLineInput = process.argv.slice(2);
 console.log("commandLineInput:", commandLineInput);
 const selectedCohort = commandLineInput[0];
+const values = [selectedCohort]; // For sanitization - selectedCohort will replace $1 in query string below
 
 pool
   .query(
@@ -18,9 +19,10 @@ pool
     JOIN students ON students.id = student_id
     JOIN cohorts ON cohorts.id = cohort_id
     JOIN teachers ON teachers.id = teacher_id
-    WHERE cohorts.name = '${selectedCohort}'
+    WHERE cohorts.name = $1
     GROUP BY teacher, cohort
-    ORDER BY teacher;`
+    ORDER BY teacher;`,
+    values // sanitized selectedCohort passed in here
   )
   .then((res) => {
     res.rows.forEach((user) => {

@@ -11,6 +11,7 @@ commandLineInput = process.argv.slice(2);
 console.log("commandLineInput:", commandLineInput);
 const selectedCohort = commandLineInput[0];
 const selectedLimit = commandLineInput[1];
+const values = [`%${selectedCohort}%`, selectedLimit]; // For sanitization - array values will replace $1 & $2 in query string below
 
 pool
   .query(
@@ -18,9 +19,10 @@ pool
 SELECT students.id as student_id, students.name as name, cohorts.name as cohort
 FROM students
 JOIN cohorts ON cohorts.id = cohort_id
-WHERE cohorts.name LIKE '%${selectedCohort}%'
-LIMIT ${selectedLimit};
-`
+WHERE cohorts.name LIKE $1
+LIMIT $2;
+`,
+    values // sanitized values passed in here
   )
   .then((res) => {
     res.rows.forEach((user) => {
